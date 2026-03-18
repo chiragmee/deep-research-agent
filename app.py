@@ -4,185 +4,105 @@ from duckduckgo_search import DDGS
 import markdown as md_converter
 import time
 
-# ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Deep Research Agent",
-    page_icon="🔍",
+    page_title="Periscope · AI Research Agent",
+    page_icon="🔭",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# ── Custom CSS ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 
-  html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, [class*="css"], .stApp { font-family: 'DM Sans', sans-serif; background-color: #0A0A0F !important; color: #E8E6E0; }
+.stApp { background: #0A0A0F !important; }
 
-  .hero {
-    background: linear-gradient(135deg, #0F6E56 0%, #185FA5 100%);
-    border-radius: 16px;
-    padding: 2.5rem 2rem;
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  .hero h1 {
-    color: white;
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-  }
-  .hero p {
-    color: rgba(255,255,255,0.85);
-    font-size: 1rem;
-    margin: 0;
-  }
-  .badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.2);
-    color: white;
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin: 0.75rem 4px 0;
-  }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 4rem; }
+.nav-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; color: #F0EDE6; }
+.nav-logo span { color: #C8F04D; }
+.nav-tag { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; }
 
-  .built-by {
-    text-align: center;
-    color: #888;
-    font-size: 0.8rem;
-    margin-bottom: 1.5rem;
-  }
-  .built-by span {
-    color: #0F6E56;
-    font-weight: 600;
-  }
+.hero-eyebrow { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #C8F04D; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+.hero-eyebrow::before { content: ''; display: inline-block; width: 20px; height: 1px; background: #C8F04D; }
+.hero-title { font-family: 'Syne', sans-serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; color: #F0EDE6; margin-bottom: 1.25rem; }
+.hero-title em { font-style: normal; color: transparent; -webkit-text-stroke: 1px rgba(240,237,230,0.4); }
+.hero-sub { font-size: 1rem; font-weight: 300; line-height: 1.7; color: rgba(232,230,224,0.55); max-width: 480px; margin-bottom: 2.5rem; }
 
-  .section-card {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
-  }
-  .section-card h3 {
-    color: #185FA5;
-    margin: 0 0 0.5rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
+.pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 3.5rem; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 400; color: rgba(232,230,224,0.6); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 6px 14px; }
+.pill-dot { width: 5px; height: 5px; border-radius: 50%; background: #C8F04D; flex-shrink: 0; }
 
-  .report-container {
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-top: 1.5rem;
-  }
+.form-label { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(232,230,224,0.4); margin-bottom: 0.6rem; }
+.stTextInput > div > div > input { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px !important; color: #F0EDE6 !important; font-family: 'DM Sans', sans-serif !important; font-size: 1rem !important; font-weight: 300 !important; padding: 14px 18px !important; transition: border-color 0.2s !important; }
+.stTextInput > div > div > input:focus { border-color: #C8F04D !important; box-shadow: 0 0 0 3px rgba(200,240,77,0.08) !important; }
+.stTextInput > div > div > input::placeholder { color: rgba(232,230,224,0.25) !important; }
 
-  .search-log {
-    background: #1e1e1e;
-    border-radius: 8px;
-    padding: 1rem 1.25rem;
-    font-family: 'Courier New', monospace;
-    font-size: 0.82rem;
-    color: #9FE1CB;
-    margin: 0.5rem 0;
-  }
+.ex-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(232,230,224,0.3); margin: 1rem 0 0.6rem; }
+.stButton > button { background: rgba(255,255,255,0.04) !important; color: rgba(232,230,224,0.65) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 8px !important; font-family: 'DM Sans', sans-serif !important; font-size: 0.82rem !important; font-weight: 400 !important; padding: 6px 14px !important; transition: all 0.15s !important; width: 100% !important; }
+.stButton > button:hover { background: rgba(200,240,77,0.08) !important; border-color: rgba(200,240,77,0.3) !important; color: #C8F04D !important; }
 
-  .metric-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-  }
-  .metric {
-    flex: 1;
-    background: #f0faf6;
-    border: 1px solid #9FE1CB;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    text-align: center;
-  }
-  .metric .num { font-size: 1.5rem; font-weight: 700; color: #0F6E56; }
-  .metric .lbl { font-size: 0.75rem; color: #555; margin-top: 2px; }
+.search-log { background: #111118; border: 1px solid rgba(200,240,77,0.15); border-left: 3px solid #C8F04D; border-radius: 10px; padding: 1rem 1.25rem; font-family: 'Courier New', monospace; font-size: 0.82rem; color: rgba(200,240,77,0.8); line-height: 1.8; margin: 1rem 0; }
 
-  .stButton > button {
-    background: linear-gradient(135deg, #0F6E56, #185FA5) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 10px !important;
-    padding: 0.6rem 2rem !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    width: 100% !important;
-    transition: opacity 0.2s !important;
-  }
-  .stButton > button:hover { opacity: 0.9 !important; }
+.stProgress > div > div { background: rgba(255,255,255,0.06) !important; border-radius: 4px !important; }
+.stProgress > div > div > div { background: #C8F04D !important; border-radius: 4px !important; }
 
-  .download-btn {
-    display: inline-block;
-    background: #0F6E56;
-    color: white;
-    border-radius: 8px;
-    padding: 8px 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    margin-top: 1rem;
-  }
+.metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.5rem 0; }
+.metric-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1rem; text-align: center; }
+.metric-card .num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: #C8F04D; line-height: 1; margin-bottom: 4px; }
+.metric-card .lbl { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(232,230,224,0.35); }
 
-  footer { visibility: hidden; }
-  #MainMenu { visibility: hidden; }
+.report-wrap { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 2.5rem; margin-top: 1.5rem; }
+.report-wrap h1 { font-family: 'Syne', sans-serif !important; font-size: 1.6rem !important; font-weight: 800 !important; color: #F0EDE6 !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; padding-bottom: 0.75rem !important; margin-bottom: 1.5rem !important; }
+.report-wrap h2 { font-family: 'Syne', sans-serif !important; font-size: 1.15rem !important; font-weight: 700 !important; color: #C8F04D !important; margin-top: 2rem !important; margin-bottom: 0.75rem !important; }
+.report-wrap h3 { font-size: 0.85rem !important; font-weight: 500 !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; color: rgba(232,230,224,0.5) !important; margin-top: 1.25rem !important; margin-bottom: 0.4rem !important; }
+.report-wrap p, .report-wrap li { font-size: 0.95rem !important; line-height: 1.8 !important; color: rgba(232,230,224,0.75) !important; }
+.report-wrap strong { color: #F0EDE6 !important; font-weight: 500 !important; }
+.report-wrap hr { border: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; margin: 1.5rem 0 !important; }
+.report-wrap ul { padding-left: 1.25rem !important; }
+.report-wrap li { margin: 6px 0 !important; }
+
+.section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+.section-num { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; color: #C8F04D; background: rgba(200,240,77,0.1); border: 1px solid rgba(200,240,77,0.2); border-radius: 6px; padding: 2px 8px; }
+.section-title { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(232,230,224,0.4); }
+
+.stDownloadButton > button { background: transparent !important; color: rgba(232,230,224,0.6) !important; border: 1px solid rgba(255,255,255,0.12) !important; border-radius: 10px !important; font-family: 'DM Sans', sans-serif !important; font-size: 0.85rem !important; padding: 10px 20px !important; width: auto !important; }
+.stDownloadButton > button:hover { border-color: rgba(200,240,77,0.4) !important; color: #C8F04D !important; }
+
+.run-btn > div > .stButton > button { background: #C8F04D !important; color: #0A0A0F !important; border: none !important; border-radius: 12px !important; font-family: 'Syne', sans-serif !important; font-size: 0.95rem !important; font-weight: 700 !important; padding: 14px 32px !important; width: 100% !important; }
+.run-btn > div > .stButton > button:hover { background: #d8ff5a !important; }
+
+.footer { text-align: center; padding: 3rem 0 2rem; font-size: 0.78rem; color: rgba(232,230,224,0.2); letter-spacing: 0.04em; }
+.footer span { color: rgba(200,240,77,0.5); }
+
+footer { visibility: hidden; }
+#MainMenu { visibility: hidden; }
+.stDeployButton { display: none; }
+[data-testid="stToolbar"] { display: none; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Hero Section ───────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="hero">
-  <h1>🔍 Deep Research Agent</h1>
-  <p>Enter any topic and get an AI-powered competitor analysis report in seconds</p>
-  <span class="badge">⚡ Powered by Claude AI</span>
-  <span class="badge">🌐 Live Web Search</span>
-  <span class="badge">📊 Structured Reports</span>
+<div class="nav">
+  <div class="nav-logo">Periscope<span>.</span></div>
+  <div class="nav-tag">AI Research Agent</div>
+</div>
+<div class="hero-eyebrow">Competitive Intelligence</div>
+<div class="hero-title">Research any market.<br><em>Instantly.</em></div>
+<div class="hero-sub">Enter a topic and watch the agent autonomously search the web, analyse competitors, and deliver a structured intelligence report — in under a minute.</div>
+<div class="pill-row">
+  <div class="pill"><div class="pill-dot"></div>Live web search</div>
+  <div class="pill"><div class="pill-dot"></div>Claude AI synthesis</div>
+  <div class="pill"><div class="pill-dot"></div>Positioning · Differentiation · Impact</div>
+  <div class="pill"><div class="pill-dot"></div>Downloadable report</div>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div class="built-by">Built by <span>Chirag Mewara</span> · Deep Research Agent v1.0</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="form-label">01 — Research topic</div>', unsafe_allow_html=True)
+topic = st.text_input("", placeholder="e.g. AI coding assistants, CRM software, no-code builders...", label_visibility="collapsed", key="topic_input")
 
-# ── How it works ───────────────────────────────────────────────────────────────
-with st.expander("ℹ️ How does this work?"):
-    st.markdown("""
-    This is an **AI Agent** — not just a chatbot. Here's what happens when you click Research:
-
-    1. **Claude AI** decides what to search for based on your topic
-    2. It calls the **DuckDuckGo search tool** multiple times to gather live web data
-    3. It reads and synthesises all the results
-    4. It writes a structured **competitor analysis report** covering:
-       - 🎯 Positioning · 💡 Differentiation · 📈 Impact · 💬 Market Sentiment
-    5. The report is displayed here and available to download as HTML
-    """)
-
-# ── Input ──────────────────────────────────────────────────────────────────────
-st.markdown("### Enter your research topic")
-
-col1, col2 = st.columns([3, 1])
-with col1:
-    topic = st.text_input(
-        "",
-        placeholder="e.g. AI coding assistants, CRM software, no-code app builders...",
-        label_visibility="collapsed"
-    )
-
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-
-# Example chips
-st.markdown("**Quick examples:**")
+st.markdown('<div class="ex-label">Quick start</div>', unsafe_allow_html=True)
 ex_cols = st.columns(4)
 examples = ["AI writing tools", "No-code builders", "CRM software", "Product analytics"]
 for i, ex in enumerate(examples):
@@ -190,168 +110,100 @@ for i, ex in enumerate(examples):
         if st.button(ex, key=f"ex_{i}"):
             topic = ex
 
-# ── API Key input ──────────────────────────────────────────────────────────────
-st.markdown("### 🔑 Your Anthropic API Key")
-api_key = st.text_input(
-    "",
-    type="password",
-    placeholder="sk-ant-api03-...",
-    help="Get your key at console.anthropic.com",
-    label_visibility="collapsed"
-)
-st.caption("🔒 Your key is never stored — it is only used for this session. Get one at [console.anthropic.com](https://console.anthropic.com)")
+st.markdown('<div class="form-label" style="margin-top:1.5rem;">02 — Anthropic API key</div>', unsafe_allow_html=True)
+api_key = st.text_input("", type="password", placeholder="sk-ant-api03-...", label_visibility="collapsed", key="api_key_input")
+st.markdown('<div style="font-size:0.75rem; color:rgba(232,230,224,0.25); margin-top:6px;">Your key is never stored. Get one at <a href="https://console.anthropic.com" style="color:rgba(200,240,77,0.5);">console.anthropic.com</a></div>', unsafe_allow_html=True)
 
-# ── Agent functions ────────────────────────────────────────────────────────────
-def search_web(query: str) -> str:
+st.markdown('<div class="run-btn" style="margin-top:2rem;">', unsafe_allow_html=True)
+run_clicked = st.button("Run research agent →", key="run_btn")
+st.markdown('</div>', unsafe_allow_html=True)
+
+with st.expander("How does this agent work?"):
+    st.markdown("""
+    **This is an AI Agent — not a chatbot.** Here's what happens when you hit Run:
+    1. **Claude AI** receives your topic and decides what to search for
+    2. It autonomously calls **DuckDuckGo** multiple times with different queries
+    3. It reads and cross-references all search results
+    4. It synthesises a structured report: **Positioning · Differentiation · Impact · Market Sentiment**
+    5. You get a downloadable report and a live preview
+
+    Built by **Chirag Mewara** using the Anthropic SDK, DuckDuckGo Search, and Streamlit.
+    """)
+
+def search_web(query):
     try:
         results = DDGS().text(query, max_results=5)
         if not results:
             return "No results found."
-        formatted = []
-        for r in results:
-            formatted.append(f"Title: {r['title']}\nURL: {r['href']}\nSummary: {r['body']}")
-        return "\n---\n".join(formatted)
+        return "\n---\n".join([f"Title: {r['title']}\nURL: {r['href']}\nSummary: {r['body']}" for r in results])
     except Exception as e:
         return f"Search failed: {str(e)}"
 
-def run_agent(topic: str, api_key: str, log_container, progress_bar):
+def run_agent(topic, api_key, log_container, progress_bar):
     client = anthropic.Anthropic(api_key=api_key)
-
-    tools = [{
-        "name": "web_search",
-        "description": "Search the web for current information about a topic.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "The search query"}
-            },
-            "required": ["query"]
-        }
-    }]
-
+    tools = [{"name": "web_search", "description": "Search the web for current information.", "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}}]
     system_prompt = """You are a deep research agent that creates competitor analysis reports.
 When given a topic, you MUST:
-1. Search the web at least 3 times with different queries to gather comprehensive information
-2. Write a structured Markdown report covering the top 3 competitors/players with these sections for each:
-   - **Positioning**: How they present themselves in the market
-   - **Differentiation**: What makes them unique
-   - **Impact**: Traction, users, revenue, achievements
-   - **Market Sentiment**: How users/analysts talk about them
-3. End with a '## Key Takeaways' section with 3-4 bullet points
-
-Format with proper Markdown headings. Be specific and data-driven."""
-
-    messages = [{"role": "user", "content": f"Research the competitive landscape for: {topic}. Write a detailed competitor analysis report."}]
-
+1. Search the web at least 3 times with different queries
+2. Write a structured Markdown report covering the top 3 competitors with:
+   - **Positioning**, **Differentiation**, **Impact**, **Market Sentiment**
+3. End with '## Key Takeaways' with 3-4 bullet points
+Be specific and data-driven."""
+    messages = [{"role": "user", "content": f"Research competitive landscape for: {topic}. Write a detailed competitor analysis report."}]
     searches_done = 0
     log_lines = []
     progress_bar.progress(10)
-
     while True:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            system=system_prompt,
-            tools=tools,
-            messages=messages
-        )
-
+        response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=4096, system=system_prompt, tools=tools, messages=messages)
         if response.stop_reason == "end_turn":
             progress_bar.progress(100)
             for block in response.content:
                 if block.type == "text":
                     return block.text, searches_done
             return "No report generated.", searches_done
-
         if response.stop_reason == "tool_use":
             messages.append({"role": "assistant", "content": response.content})
             tool_results = []
-
             for block in response.content:
                 if block.type == "tool_use":
                     searches_done += 1
                     query = block.input['query']
-                    log_lines.append(f"🔎 Search {searches_done}: {query}")
-                    log_container.markdown(
-                        '<div class="search-log">' + '<br>'.join(log_lines) + '</div>',
-                        unsafe_allow_html=True
-                    )
+                    log_lines.append(f"→ [{searches_done}] {query}")
+                    log_container.markdown(f'<div class="search-log">' + '<br>'.join(log_lines) + '</div>', unsafe_allow_html=True)
                     progress_bar.progress(min(10 + searches_done * 20, 85))
-                    result = search_web(query)
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result
-                    })
-
+                    tool_results.append({"type": "tool_result", "tool_use_id": block.id, "content": search_web(query)})
             messages.append({"role": "user", "content": tool_results})
-
-# ── Run Button ─────────────────────────────────────────────────────────────────
-run_clicked = st.button("🚀 Research this topic")
 
 if run_clicked:
     if not topic:
-        st.warning("Please enter a topic first.")
+        st.warning("Please enter a research topic above.")
     elif not api_key:
-        st.warning("Please enter your Anthropic API key in the sidebar (click > on the left).")
+        st.warning("Please enter your Anthropic API key above.")
     else:
         st.divider()
-        st.markdown("### 🤖 Agent is working...")
-
+        st.markdown('<div class="section-header"><div class="section-num">LIVE</div><div class="section-title">Agent running</div></div>', unsafe_allow_html=True)
         progress = st.progress(0)
         log_box = st.empty()
         status = st.empty()
-
         try:
             start = time.time()
             report, num_searches = run_agent(topic, api_key, log_box, progress)
             elapsed = round(time.time() - start, 1)
-
-            status.success(f"✅ Report generated in {elapsed} seconds using {num_searches} web searches!")
-
-            # Metrics
+            status.success(f"Research complete — {num_searches} searches · {elapsed}s")
             word_count = len(report.split())
-            st.markdown(f"""
-            <div class="metric-row">
-              <div class="metric"><div class="num">{num_searches}</div><div class="lbl">Web searches</div></div>
-              <div class="metric"><div class="num">{word_count}</div><div class="lbl">Words in report</div></div>
-              <div class="metric"><div class="num">{elapsed}s</div><div class="lbl">Time taken</div></div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Report display
-            st.markdown("### 📊 Your Competitor Analysis Report")
-            st.markdown('<div class="report-container">', unsafe_allow_html=True)
+            st.markdown(f'<div class="metrics-row"><div class="metric-card"><div class="num">{num_searches}</div><div class="lbl">Searches run</div></div><div class="metric-card"><div class="num">{word_count}</div><div class="lbl">Words written</div></div><div class="metric-card"><div class="num">{elapsed}s</div><div class="lbl">Time taken</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-header" style="margin-top:2rem;"><div class="section-num">REPORT</div><div class="section-title">Competitor analysis</div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="report-wrap">', unsafe_allow_html=True)
             st.markdown(report)
             st.markdown('</div>', unsafe_allow_html=True)
-
-            # Download button
-            html_report = f"""<!DOCTYPE html>
-<html><head><meta charset='UTF-8'><title>Competitor Analysis: {topic}</title>
-<style>
-  body{{font-family:-apple-system,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;color:#1a1a1a;line-height:1.7}}
-  h1{{color:#0F6E56;border-bottom:2px solid #E1F5EE;padding-bottom:8px}}
-  h2{{color:#185FA5;margin-top:2rem}}
-  strong{{color:#0F6E56}}
-  hr{{border:none;border-top:1px solid #eee;margin:2rem 0}}
-</style></head><body>{md_converter.markdown(report)}</body></html>"""
-
-            st.download_button(
-                label="⬇️ Download Report as HTML",
-                data=html_report,
-                file_name=f"{topic.lower().replace(' ', '-')}-report.html",
-                mime="text/html"
-            )
-
+            html_report = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>{topic} — Periscope</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>*{{box-sizing:border-box;margin:0;padding:0}}body{{font-family:'DM Sans',sans-serif;background:#0A0A0F;color:#E8E6E0;max-width:760px;margin:0 auto;padding:3rem 2rem;line-height:1.8}}h1{{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#F0EDE6;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:1rem;margin-bottom:2rem}}h2{{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:#C8F04D;margin-top:2.5rem;margin-bottom:0.75rem}}h3{{font-size:0.78rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(232,230,224,0.4);margin-top:1.5rem;margin-bottom:0.5rem}}p,li{{font-size:0.95rem;color:rgba(232,230,224,0.7);line-height:1.8}}strong{{color:#F0EDE6;font-weight:500}}ul{{padding-left:1.25rem}}li{{margin:6px 0}}hr{{border:none;border-top:1px solid rgba(255,255,255,0.06);margin:2rem 0}}.meta{{font-size:0.75rem;color:rgba(232,230,224,0.2);text-align:right;margin-top:3rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06)}}</style>
+</head><body>{md_converter.markdown(report)}<div class="meta">Generated by Periscope · Built by Chirag Mewara</div></body></html>"""
+            st.download_button(label="↓ Download report", data=html_report, file_name=f"{topic.lower().replace(' ', '-')}-report.html", mime="text/html")
         except anthropic.AuthenticationError:
-            st.error("❌ Invalid API key. Please check your key in the sidebar.")
+            st.error("Invalid API key — please check and try again.")
         except Exception as e:
-            st.error(f"❌ Something went wrong: {str(e)}")
+            st.error(f"Something went wrong: {str(e)}")
 
-# ── Footer ─────────────────────────────────────────────────────────────────────
-st.divider()
-st.markdown("""
-<div style='text-align:center; color:#aaa; font-size:0.8rem; padding: 1rem 0'>
-  Built with ❤️ using Claude AI · Anthropic SDK · DuckDuckGo Search · Streamlit
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="footer">Periscope · Built by <span>Chirag Mewara</span> · Powered by Claude AI & DuckDuckGo</div>', unsafe_allow_html=True)
