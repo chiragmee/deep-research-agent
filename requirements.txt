@@ -1,0 +1,4 @@
+anthropic
+duckduckgo-search
+markdown
+streamlit
