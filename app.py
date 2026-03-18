@@ -99,7 +99,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="form-label">01 — Research topic</div>', unsafe_allow_html=True)
+st.markdown('<div class="form-label">Research topic</div>', unsafe_allow_html=True)
 topic = st.text_input("", placeholder="e.g. AI coding assistants, CRM software, no-code builders...", label_visibility="collapsed", key="topic_input")
 
 st.markdown('<div class="ex-label">Quick start</div>', unsafe_allow_html=True)
@@ -110,9 +110,7 @@ for i, ex in enumerate(examples):
         if st.button(ex, key=f"ex_{i}"):
             topic = ex
 
-st.markdown('<div class="form-label" style="margin-top:1.5rem;">02 — Anthropic API key</div>', unsafe_allow_html=True)
-api_key = st.text_input("", type="password", placeholder="sk-ant-api03-...", label_visibility="collapsed", key="api_key_input")
-st.markdown('<div style="font-size:0.75rem; color:rgba(232,230,224,0.25); margin-top:6px;">Your key is never stored. Get one at <a href="https://console.anthropic.com" style="color:rgba(200,240,77,0.5);">console.anthropic.com</a></div>', unsafe_allow_html=True)
+api_key = st.secrets["ANTHROPIC_API_KEY"]
 
 st.markdown('<div class="run-btn" style="margin-top:2rem;">', unsafe_allow_html=True)
 run_clicked = st.button("Run research agent →", key="run_btn")
